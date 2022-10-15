@@ -1,4 +1,6 @@
-import 'package:YTFeed/fetch.dart';
+import 'dart:convert';
+
+import 'package:YTFeed/sublist.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,30 +15,46 @@ class SubPage extends StatefulWidget {
 
 class _SubsPageState extends State<SubPage> {
   final _formKey = GlobalKey<FormState>();
-  final _apiController = TextEditingController();
-  String _apiKey = '';
+  final _channelController = TextEditingController();
+  final _idController = TextEditingController();
+  List<Sub> _subList = [Sub(name: 'name', channelId: 'channelId')];
   int _last = 0;
+
+  //TODO To avoid needing to iterate over sublist on a simple insert should I create mapping and index list to save??
+  //    Will just implement the full iteration each time, but should check to see if it works otherwise
 
   @override
   void initState() {
     super.initState();
-    _loadApiKey();
+    _loadSubList();
     _loadLast();
-    fetchSubList();
   }
 
-  _loadApiKey() async {
+//TODO ugly code
+  _loadSubList() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _apiKey = (prefs.getString('apikey') ?? 'String');
+      var unparsedSubList = (prefs.getStringList('subList'));
+      if (unparsedSubList == null) {
+        //TODO Null check
+      } else {
+        List<Sub> newSubList = [];
+        for (var sub in unparsedSubList) {
+          Map<String, dynamic> subMap = jsonDecode(sub);
+          newSubList.add(Sub.fromJson(subMap));
+        }
+        _subList = newSubList;
+      }
     });
   }
 
-  _setApiKey(String key) async {
+  _addToSubList(String newName, String newChannelId) async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      prefs.setString('apikey', key);
-      _apiKey = key;
+      Sub newSub = Sub(name: newName, channelId: newChannelId);      
+      _subList.add(newSub);
+      var newSubListJson = json.encode(_subList);
+      prefs.setString('subList', newSubListJson);
     });
   }
 
@@ -68,12 +86,25 @@ class _SubsPageState extends State<SubPage> {
             TextFormField(
               decoration: const InputDecoration(
                 border: UnderlineInputBorder(),
-                labelText: 'Enter your Google API Key',
+                labelText: 'Enter the name for this channel',
               ),
-              controller: _apiController,
+              controller: _channelController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a valid API Key';
+                  return 'Please enter a name for this channel';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Enter the channel ID',
+              ),
+              controller: _idController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Enter the channel ID';
                 }
                 return null;
               },
@@ -83,9 +114,9 @@ class _SubsPageState extends State<SubPage> {
               child: ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    _setApiKey(_apiController.text);
+                    _addToSubList(_channelController.text, _idController.text);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Saved API Key')),
+                      const SnackBar(content: Text('Saved Channel')),
                     );
                   }
                 },
@@ -93,10 +124,10 @@ class _SubsPageState extends State<SubPage> {
               ),
             ),
             const Text(
-              'API Key Is:',
+              'Saved channels are:',
             ),
             Text(
-              _apiKey,
+              _subList[0].name,
               style: Theme.of(context).textTheme.headline4,
             ),
           ],
