@@ -6,11 +6,24 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:first_app/main.dart';
+import 'package:YTFeed/main.dart';
 
 void main() {
+  setUpAll(() async {
+    const MethodChannel('plugins.flutter.io/shared_preferences')
+        .setMockMethodCallHandler((methodCall) async {
+      if (methodCall.method == 'getAll') {
+        return <String, dynamic>{
+          
+        }; // set initial values here if desired
+      }
+      return null;
+    });
+  });
+
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());

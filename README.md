@@ -1,6 +1,6 @@
-# first_app
+# YTFeed
 
-A new Flutter project.
+Grabs new youtube videos similar to Google Podcasts
 
 ## Getting Started
 
