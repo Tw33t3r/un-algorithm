@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:YTFeed/sublist.dart';
+import 'package:YTFeed/components/sub_item.dart';
+import 'package:YTFeed/models/sub.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,7 +18,7 @@ class _SubsPageState extends State<SubPage> {
   final _formKey = GlobalKey<FormState>();
   final _channelController = TextEditingController();
   final _idController = TextEditingController();
-  List<Sub> _subList = [Sub(name: 'name', channelId: 'channelId')];
+  List<Sub> _subList = [];
   int _last = 0;
 
   //TODO To avoid needing to iterate over sublist on a simple insert should I create mapping and index list to save??
@@ -34,14 +35,13 @@ class _SubsPageState extends State<SubPage> {
   _loadSubList() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      var unparsedSubList = (prefs.getStringList('subList'));
+      var unparsedSubList = (prefs.getString('subList'));
       if (unparsedSubList == null) {
-        //TODO Null check
       } else {
         List<Sub> newSubList = [];
-        for (var sub in unparsedSubList) {
-          Map<String, dynamic> subMap = jsonDecode(sub);
-          newSubList.add(Sub.fromJson(subMap));
+        dynamic subMapList = jsonDecode(unparsedSubList);
+        for (var sub in subMapList) {
+          newSubList.add(Sub.fromJson(sub));
         }
         _subList = newSubList;
       }
@@ -51,9 +51,9 @@ class _SubsPageState extends State<SubPage> {
   _addToSubList(String newName, String newChannelId) async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      Sub newSub = Sub(name: newName, channelId: newChannelId);      
+      Sub newSub = Sub(name: newName, channelId: newChannelId);
       _subList.add(newSub);
-      var newSubListJson = json.encode(_subList);
+      String newSubListJson = json.encode(_subList);
       prefs.setString('subList', newSubListJson);
     });
   }
@@ -123,12 +123,17 @@ class _SubsPageState extends State<SubPage> {
                 child: const Text('Save'),
               ),
             ),
-            const Text(
-              'Saved channels are:',
-            ),
-            Text(
-              _subList[0].name,
-              style: Theme.of(context).textTheme.headline4,
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _subList.length,
+                prototypeItem: const ListTile(
+                  title: Text("Subscription Lists"),
+                ),
+                itemBuilder: (context, index) {
+                  return SubItem(_subList[index], const Icon(Icons.more_vert));
+                },
+              ),
             ),
           ],
         ),
