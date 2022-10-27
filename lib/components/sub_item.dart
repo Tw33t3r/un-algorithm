@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 /// A ListItem that contains data to display a message.
 class SubItem extends StatelessWidget {
   final Sub sub;
-  Icon image;
+  final Icon image;
 
-  SubItem(this.sub, this.image, {super.key});
+  const SubItem(this.sub, this.image, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,19 +16,38 @@ class SubItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Expanded(
-            flex: 2,
+            flex: 1,
             child: image,
           ),
           Expanded(
-            flex: 3,
+            flex: 5,
             child: _VideoDescription(
               name: sub.name,
               channelId: sub.channelId,
             ),
           ),
-          const Icon(
-            Icons.more_vert,
-            size: 16.0,
+          Expanded(
+            flex: 1,
+            child: Row(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.edit),
+                    iconSize: 24.0,
+                    onPressed: () {},
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.delete),
+                    iconSize: 24.0,
+                    onPressed: () {},
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

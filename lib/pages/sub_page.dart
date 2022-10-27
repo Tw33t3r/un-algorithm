@@ -5,8 +5,12 @@ import 'package:YTFeed/models/sub.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/sub_storage.dart';
+
 class SubPage extends StatefulWidget {
-  const SubPage({super.key});
+  const SubPage({super.key, required this.subStorage});
+
+  final SubStorage subStorage;
 
   final String title = "Subs";
 
@@ -18,7 +22,7 @@ class _SubsPageState extends State<SubPage> {
   final _formKey = GlobalKey<FormState>();
   final _channelController = TextEditingController();
   final _idController = TextEditingController();
-  List<Sub> _subList = [];
+  Map<String, Sub> _subs = {};
   int _last = 0;
 
   //TODO To avoid needing to iterate over sublist on a simple insert should I create mapping and index list to save??
@@ -31,30 +35,17 @@ class _SubsPageState extends State<SubPage> {
     _loadLast();
   }
 
-//TODO ugly code
   _loadSubList() async {
-    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      var unparsedSubList = (prefs.getString('subList'));
-      if (unparsedSubList == null) {
-      } else {
-        List<Sub> newSubList = [];
-        dynamic subMapList = jsonDecode(unparsedSubList);
-        for (var sub in subMapList) {
-          newSubList.add(Sub.fromJson(sub));
-        }
-        _subList = newSubList;
-      }
+      _subs = widget.subStorage.readSubs() as Map<String, Sub>;
     });
   }
 
   _addToSubList(String newName, String newChannelId) async {
-    final prefs = await SharedPreferences.getInstance();
     setState(() {
       Sub newSub = Sub(name: newName, channelId: newChannelId);
-      _subList.add(newSub);
-      String newSubListJson = json.encode(_subList);
-      prefs.setString('subList', newSubListJson);
+      _subs[newChannelId] = newSub;
+      widget.subStorage.writeSubs(_subs);
     });
   }
 
@@ -126,12 +117,13 @@ class _SubsPageState extends State<SubPage> {
             Expanded(
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: _subList.length,
+                itemCount: _subs.length,
                 prototypeItem: const ListTile(
                   title: Text("Subscription Lists"),
                 ),
                 itemBuilder: (context, index) {
-                  return SubItem(_subList[index], const Icon(Icons.more_vert));
+                  return SubItem(
+                      _subs[index]!, const Icon(Icons.more_vert));
                 },
               ),
             ),
