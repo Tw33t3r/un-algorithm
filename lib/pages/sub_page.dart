@@ -36,8 +36,10 @@ class _SubsPageState extends State<SubPage> {
   }
 
   _loadSubList() async {
-    setState(() {
-      _subs = widget.subStorage.readSubs() as Map<String, Sub>;
+    widget.subStorage.readSubs().then((result) {
+      setState(() {
+        _subs = result;
+      });
     });
   }
 
@@ -122,8 +124,8 @@ class _SubsPageState extends State<SubPage> {
                   title: Text("Subscription Lists"),
                 ),
                 itemBuilder: (context, index) {
-                  return SubItem(
-                      _subs[index]!, const Icon(Icons.more_vert));
+                  return SubItem(_subs[_subs.keys.elementAt(index)]!,
+                      const Icon(Icons.more_vert));
                 },
               ),
             ),

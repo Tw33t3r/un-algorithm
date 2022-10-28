@@ -22,8 +22,14 @@ class SubStorage {
 
       // Read the file
       final contents = await file.readAsString();
-    
-      return (jsonDecode(contents));
+      Map<String, dynamic> result = json.decode(contents);
+
+      Map<String, Sub> toReturn = {};
+      result.forEach(((key, value) {
+        toReturn[key] = Sub.fromJson(value);
+      }));
+
+      return (toReturn);
     } catch (e) {
       // If encountering an error, return 0
       return {};
@@ -34,6 +40,6 @@ class SubStorage {
     final file = await _localFile;
 
     // Write the file
-    return file.writeAsString(jsonEncode(subs));
+    return file.writeAsString(json.encode(subs));
   }
 }
