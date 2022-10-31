@@ -43,6 +43,13 @@ class _SubsPageState extends State<SubPage> {
     });
   }
 
+  _deleteFromSubList(String channelId) async {
+    setState(() {
+        _subs.remove(channelId);
+        widget.subStorage.writeSubs(_subs);
+    });
+  }
+
   _addToSubList(String newName, String newChannelId) async {
     setState(() {
       Sub newSub = Sub(name: newName, channelId: newChannelId);
@@ -125,7 +132,7 @@ class _SubsPageState extends State<SubPage> {
                 ),
                 itemBuilder: (context, index) {
                   return SubItem(_subs[_subs.keys.elementAt(index)]!,
-                      const Icon(Icons.more_vert));
+                      const Icon(Icons.more_vert), _deleteFromSubList);
                 },
               ),
             ),

@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 
 /// A ListItem that contains data to display a message.
 class SubItem extends StatelessWidget {
+  final Function deleteItem;
   final Sub sub;
   final Icon image;
 
-  const SubItem(this.sub, this.image, {super.key});
+  const SubItem(this.sub, this.image, this.deleteItem, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,9 @@ class SubItem extends StatelessWidget {
                   child: IconButton(
                     icon: const Icon(Icons.delete),
                     iconSize: 24.0,
-                    onPressed: () {},
+                    onPressed: () async {
+                      await deleteItem(sub.channelId);
+                    },
                   ),
                 ),
               ],
