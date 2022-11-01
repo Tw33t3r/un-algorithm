@@ -5,9 +5,8 @@ import 'package:flutter/material.dart';
 class SubItem extends StatelessWidget {
   final Function deleteItem;
   final Sub sub;
-  final Icon image;
 
-  const SubItem(this.sub, this.image, this.deleteItem, {super.key});
+  const SubItem(this.sub, this.deleteItem, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +17,7 @@ class SubItem extends StatelessWidget {
         children: <Widget>[
           Expanded(
             flex: 1,
-            child: image,
+            child: Image.network(sub.imageURL),
           ),
           Expanded(
             flex: 5,

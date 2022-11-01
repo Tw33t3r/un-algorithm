@@ -1,9 +1,9 @@
-import 'dart:convert';
-
 import 'package:YTFeed/components/sub_item.dart';
 import 'package:YTFeed/models/sub.dart';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 import '../models/sub_storage.dart';
 
@@ -25,9 +25,6 @@ class _SubsPageState extends State<SubPage> {
   Map<String, Sub> _subs = {};
   int _last = 0;
 
-  //TODO To avoid needing to iterate over sublist on a simple insert should I create mapping and index list to save??
-  //    Will just implement the full iteration each time, but should check to see if it works otherwise
-
   @override
   void initState() {
     super.initState();
@@ -35,6 +32,7 @@ class _SubsPageState extends State<SubPage> {
     _loadLast();
   }
 
+//TODO move logic for subs outside of this widget
   _loadSubList() async {
     widget.subStorage.readSubs().then((result) {
       setState(() {
@@ -45,17 +43,31 @@ class _SubsPageState extends State<SubPage> {
 
   _deleteFromSubList(String channelId) async {
     setState(() {
-        _subs.remove(channelId);
-        widget.subStorage.writeSubs(_subs);
+      _subs.remove(channelId);
+      widget.subStorage.writeSubs(_subs);
     });
   }
 
   _addToSubList(String newName, String newChannelId) async {
+    String newImageURL = await _getSubImageURL(newChannelId);
     setState(() {
-      Sub newSub = Sub(name: newName, channelId: newChannelId);
+      Sub newSub = Sub(name: newName, channelId: newChannelId, imageURL: newImageURL);
       _subs[newChannelId] = newSub;
       widget.subStorage.writeSubs(_subs);
     });
+  }
+
+    _getSubImageURL(String channelId) async {
+    final String ytUrl = "https://www.youtube.com/channel/$channelId";
+    final response = await http.get(Uri.parse(ytUrl));
+    RegExp imageExp = RegExp("(\"image_src\" href=\")(.*?)(?=\")");
+    try {
+      final imageURL = imageExp.firstMatch(response.body)!.group(2);
+      return imageURL;
+    } catch (e) {
+      rethrow;
+    }
+    //get image_src
   }
 
   _loadLast() async {
@@ -131,8 +143,9 @@ class _SubsPageState extends State<SubPage> {
                   title: Text("Subscription Lists"),
                 ),
                 itemBuilder: (context, index) {
-                  return SubItem(_subs[_subs.keys.elementAt(index)]!,
-                      const Icon(Icons.more_vert), _deleteFromSubList);
+                  return SubItem(
+                      _subs[_subs.keys.elementAt(index)]!,
+                      _deleteFromSubList);
                 },
               ),
             ),
