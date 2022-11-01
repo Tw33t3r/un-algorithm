@@ -29,10 +29,10 @@ class _SubsPageState extends State<SubPage> {
   void initState() {
     super.initState();
     _loadSubList();
-    _loadLast();
   }
 
-//TODO move logic for subs outside of this widget
+//TODO Move logic for subs outside of this widget
+//TODO Change explicit title to scraped title
   _loadSubList() async {
     widget.subStorage.readSubs().then((result) {
       setState(() {
@@ -49,15 +49,20 @@ class _SubsPageState extends State<SubPage> {
   }
 
   _addToSubList(String newName, String newChannelId) async {
-    String newImageURL = await _getSubImageURL(newChannelId);
-    setState(() {
-      Sub newSub = Sub(name: newName, channelId: newChannelId, imageURL: newImageURL);
-      _subs[newChannelId] = newSub;
-      widget.subStorage.writeSubs(_subs);
-    });
+    try {
+      String newImageURL = await _getSubImageURL(newChannelId);
+      setState(() {
+        Sub newSub =
+            Sub(name: newName, channelId: newChannelId, imageURL: newImageURL);
+        _subs[newChannelId] = newSub;
+        widget.subStorage.writeSubs(_subs);
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
 
-    _getSubImageURL(String channelId) async {
+  _getSubImageURL(String channelId) async {
     final String ytUrl = "https://www.youtube.com/channel/$channelId";
     final response = await http.get(Uri.parse(ytUrl));
     RegExp imageExp = RegExp("(\"image_src\" href=\")(.*?)(?=\")");
@@ -67,21 +72,6 @@ class _SubsPageState extends State<SubPage> {
     } catch (e) {
       rethrow;
     }
-    //get image_src
-  }
-
-  _loadLast() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _last = (prefs.getInt('last') ?? 0);
-    });
-  }
-
-  _setLast(int lastUpdated) async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      prefs.setInt('last', lastUpdated);
-    });
   }
 
   @override
@@ -144,8 +134,7 @@ class _SubsPageState extends State<SubPage> {
                 ),
                 itemBuilder: (context, index) {
                   return SubItem(
-                      _subs[_subs.keys.elementAt(index)]!,
-                      _deleteFromSubList);
+                      _subs[_subs.keys.elementAt(index)]!, _deleteFromSubList);
                 },
               ),
             ),

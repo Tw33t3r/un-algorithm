@@ -2,11 +2,11 @@ import 'package:YTFeed/models/sub.dart';
 import 'package:flutter/material.dart';
 
 /// A ListItem that contains data to display a message.
-class SubItem extends StatelessWidget {
+class VideoItem extends StatelessWidget {
   final Function deleteItem;
   final Sub sub;
 
-  const SubItem(this.sub, this.deleteItem, {super.key});
+  const VideoItem(this.sub, this.deleteItem, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class SubItem extends StatelessWidget {
           ),
           Expanded(
             flex: 5,
-            child: _SubDescription(
+            child: _VideoDescription(
               name: sub.name,
               channelId: sub.channelId,
             ),
@@ -57,8 +57,8 @@ class SubItem extends StatelessWidget {
   }
 }
 
-class _SubDescription extends StatelessWidget {
-  const _SubDescription({
+class _VideoDescription extends StatelessWidget {
+  const _VideoDescription({
     required this.name,
     required this.channelId,
   });
