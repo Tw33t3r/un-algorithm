@@ -2,15 +2,14 @@ import 'package:YTFeed/components/sub_item.dart';
 import 'package:YTFeed/models/sub.dart';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-import '../models/sub_storage.dart';
+import '../models/storage.dart';
 
 class SubPage extends StatefulWidget {
-  const SubPage({super.key, required this.subStorage});
+  const SubPage({super.key, required this.storage});
 
-  final SubStorage subStorage;
+  final Storage storage;
 
   final String title = "Subs";
 
@@ -34,7 +33,7 @@ class _SubsPageState extends State<SubPage> {
 //TODO Move logic for subs outside of this widget
 //TODO Change explicit title to scraped title
   _loadSubList() async {
-    widget.subStorage.readSubs().then((result) {
+    widget.storage.readSubs().then((result) {
       setState(() {
         _subs = result;
       });
@@ -44,7 +43,7 @@ class _SubsPageState extends State<SubPage> {
   _deleteFromSubList(String channelId) async {
     setState(() {
       _subs.remove(channelId);
-      widget.subStorage.writeSubs(_subs);
+      widget.storage.writeSubs(_subs);
     });
   }
 
@@ -55,7 +54,7 @@ class _SubsPageState extends State<SubPage> {
         Sub newSub =
             Sub(name: newName, channelId: newChannelId, imageURL: newImageURL);
         _subs[newChannelId] = newSub;
-        widget.subStorage.writeSubs(_subs);
+        widget.storage.writeSubs(_subs);
       });
     } catch (e) {
       rethrow;
@@ -65,9 +64,9 @@ class _SubsPageState extends State<SubPage> {
   _getSubImageURL(String channelId) async {
     final String ytUrl = "https://www.youtube.com/channel/$channelId";
     final response = await http.get(Uri.parse(ytUrl));
-    RegExp imageExp = RegExp("(\"image_src\" href=\")(.*?)(?=\")");
+    RegExp imageExp = RegExp("\"image_src\" href=\"(.*?)(?=\")");
     try {
-      final imageURL = imageExp.firstMatch(response.body)!.group(2);
+      final imageURL = imageExp.firstMatch(response.body)!.group(1);
       return imageURL;
     } catch (e) {
       rethrow;

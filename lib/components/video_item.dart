@@ -1,12 +1,12 @@
-import 'package:YTFeed/models/sub.dart';
+import 'package:YTFeed/models/video.dart';
 import 'package:flutter/material.dart';
 
 /// A ListItem that contains data to display a message.
 class VideoItem extends StatelessWidget {
   final Function deleteItem;
-  final Sub sub;
+  final Video video;
 
-  const VideoItem(this.sub, this.deleteItem, {super.key});
+  const VideoItem(this.video, this.deleteItem, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,15 +15,15 @@ class VideoItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Expanded(
-            flex: 1,
-            child: Image.network(sub.imageURL),
-          ),
+          // Expanded(
+          //   flex: 1,
+          //   child: Image.network(video.imageURL),
+          // ),
           Expanded(
             flex: 5,
             child: _VideoDescription(
-              name: sub.name,
-              channelId: sub.channelId,
+              name: video.name,
+              videoId: video.id,
             ),
           ),
           Expanded(
@@ -44,7 +44,7 @@ class VideoItem extends StatelessWidget {
                     icon: const Icon(Icons.delete),
                     iconSize: 24.0,
                     onPressed: () async {
-                      await deleteItem(sub.channelId);
+                      await deleteItem(video.id);
                     },
                   ),
                 ),
@@ -60,11 +60,11 @@ class VideoItem extends StatelessWidget {
 class _VideoDescription extends StatelessWidget {
   const _VideoDescription({
     required this.name,
-    required this.channelId,
+    required this.videoId,
   });
 
   final String name;
-  final String channelId;
+  final String videoId;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +82,7 @@ class _VideoDescription extends StatelessWidget {
           ),
           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
           Text(
-            channelId,
+            videoId,
             style: const TextStyle(fontSize: 10.0),
           ),
         ],

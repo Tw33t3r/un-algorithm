@@ -1,7 +1,7 @@
 import 'package:YTFeed/pages/home.dart';
 import 'package:flutter/material.dart';
 
-import 'models/sub_storage.dart';
+import 'models/storage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(subStorage: SubStorage()),
+      home: HomePage(storage: Storage()),
     );
   }
 }

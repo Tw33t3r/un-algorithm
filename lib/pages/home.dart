@@ -1,14 +1,16 @@
+import 'package:YTFeed/models/video.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:YTFeed/models/sub.dart';
-import 'package:YTFeed/models/sub_storage.dart';
+import 'package:YTFeed/models/storage.dart';
 import 'package:YTFeed/pages/sub_page.dart';
 import 'package:YTFeed/components/video_item.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.subStorage});
-  final SubStorage subStorage;
+  const HomePage({super.key, required this.storage});
+  final Storage storage;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -16,19 +18,23 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Map<String, Sub> _subs = {};
+  Map<String, Video> _videos = {};
   int _last = 0;
 
   @override
   void initState() {
     super.initState();
     _loadSubList();
+    _loadVideoList();
     _loadLast();
+    _getRecentVideos();
+    _setLast(DateTime.now().millisecondsSinceEpoch);
   }
 
   Route _createRoute() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => SubPage(
-        subStorage: widget.subStorage,
+        storage: widget.storage,
       ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
@@ -47,11 +53,55 @@ class _HomePageState extends State<HomePage> {
   }
 
   _loadSubList() async {
-    widget.subStorage.readSubs().then((result) {
+    widget.storage.readSubs().then((result) {
       setState(() {
         _subs = result;
       });
     });
+  }
+
+  _loadVideoList() async {
+    widget.storage.readVideos().then((result) {
+      setState(() {
+        _videos = result;
+      });
+    });
+  }
+
+  _getRecentVideos() async {
+    for (int i = 0; i < _subs.length; i++) {
+      final String channelId = _subs.keys.elementAt(i);
+      // This app is likely to need attention if youtube changes it's structure anyway, so I'm summoning cthulu here :)
+      //https://stackoverflow.com/questions/1732348/regex-match-open-tags-except-xhtml-self-contained-tags/1732454#1732454
+      final String xml =
+          'https://www.youtube.com/feeds/videos.xml?channel_id=$channelId';
+      final response = await http.get(Uri.parse(xml));
+      RegExp videoExp = RegExp(
+          r"<entry>[\s\S]*?<yt:videoId>([\s\S]*?)<\/yt:videoId>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<updated>([\s\S]*?)<\/updated>");
+      try {
+        final expMatches = videoExp.allMatches(response.body);
+        for (final match in expMatches) {
+          final String? videoId = match.group(1);
+          final String? name = match.group(2);
+          final String? lastUpdatedMatch = match.group(3);
+          if (videoId == null || lastUpdatedMatch == null || name == null) {
+            throw NullThrownError();
+          }
+          final lastUpdated =
+              DateTime.parse(lastUpdatedMatch).millisecondsSinceEpoch;
+          if (lastUpdated > _last) {
+            final Video newVideo =
+                Video(id: videoId, name: name, lastUpdated: lastUpdated);
+            setState(() {
+              _videos[videoId] = newVideo;
+            });
+          }
+        }
+        widget.storage.writeVideos(_videos);
+      } catch (e) {
+        rethrow;
+      }
+    }
   }
 
   _loadLast() async {
@@ -80,20 +130,22 @@ class _HomePageState extends State<HomePage> {
         Expanded(
           child: ListView.builder(
             shrinkWrap: true,
-            itemCount: _subs.length,
-            prototypeItem: const ListTile(
-              title: Text("Subscription Lists"),
-            ),
+            itemCount: _videos.length,
             itemBuilder: (context, index) {
-              return VideoItem(
-                  _subs[_subs.keys.elementAt(index)]!, _deleteFromVideoList);
+              return SizedBox(
+                  height: 200,
+                  child: VideoItem(_videos[_videos.keys.elementAt(index)]!,
+                      _deleteFromVideoList));
             },
           ),
         ),
       ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).push(_createRoute());
+          Navigator.of(context).push(_createRoute()).then((value) {
+            _loadSubList();
+            _getRecentVideos();
+          });
         },
         tooltip: 'Add A Subscription',
         child: const Icon(Icons.add),
