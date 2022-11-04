@@ -68,6 +68,13 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  _deleteFromVideoList(videoId) async {
+    setState(() {
+      _videos.remove(videoId);
+      widget.storage.writeVideos(_videos);
+    });
+  }
+
   _getRecentVideos() async {
     for (int i = 0; i < _subs.length; i++) {
       final String channelId = _subs.keys.elementAt(i);
@@ -118,8 +125,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  _deleteFromVideoList() {}
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,7 +154,7 @@ class _HomePageState extends State<HomePage> {
         },
         tooltip: 'Add A Subscription',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }

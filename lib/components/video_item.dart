@@ -1,5 +1,6 @@
 import 'package:YTFeed/models/video.dart';
 import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 /// A ListItem that contains data to display a message.
 class VideoItem extends StatelessWidget {
@@ -15,6 +16,15 @@ class VideoItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          Expanded(
+              flex: 1,
+              child: WebView(
+                initialUrl: Uri.dataFromString(
+                        '<html><body><iframe src="https://www.youtube.com/embed/${video.id}"></iframe></body></html>',
+                        mimeType: 'text/html')
+                    .toString(),
+                javascriptMode: JavascriptMode.unrestricted,
+              )),
           // Expanded(
           //   flex: 1,
           //   child: Image.network(video.imageURL),
@@ -30,14 +40,6 @@ class VideoItem extends StatelessWidget {
             flex: 1,
             child: Row(
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  child: IconButton(
-                    icon: const Icon(Icons.edit),
-                    iconSize: 24.0,
-                    onPressed: () {},
-                  ),
-                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5.0),
                   child: IconButton(
