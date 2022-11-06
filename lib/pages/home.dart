@@ -138,7 +138,7 @@ class _HomePageState extends State<HomePage> {
             itemCount: _videos.length,
             itemBuilder: (context, index) {
               return SizedBox(
-                  height: 200,
+                  height: 150,
                   child: VideoItem(_videos[_videos.keys.elementAt(index)]!,
                       _deleteFromVideoList));
             },

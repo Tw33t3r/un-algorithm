@@ -17,20 +17,16 @@ class VideoItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Expanded(
-              flex: 1,
+              flex: 3,
               child: WebView(
                 initialUrl: Uri.dataFromString(
-                        '<html><body><iframe src="https://www.youtube.com/embed/${video.id}"></iframe></body></html>',
+                        '<iframe id="player" type="text/html" width="640" height="390" src="http://www.youtube.com/embed/${video.id}" frameborder="0" allowfullscreen></iframe>',
                         mimeType: 'text/html')
                     .toString(),
                 javascriptMode: JavascriptMode.unrestricted,
               )),
-          // Expanded(
-          //   flex: 1,
-          //   child: Image.network(video.imageURL),
-          // ),
           Expanded(
-            flex: 5,
+            flex: 2,
             child: _VideoDescription(
               name: video.name,
               videoId: video.id,
