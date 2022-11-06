@@ -5,9 +5,10 @@ import 'package:webview_flutter/webview_flutter.dart';
 /// A ListItem that contains data to display a message.
 class VideoItem extends StatelessWidget {
   final Function deleteItem;
+  final Function fullscreen;
   final Video video;
 
-  const VideoItem(this.video, this.deleteItem, {super.key});
+  const VideoItem(this.video, this.deleteItem, this.fullscreen, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class VideoItem extends StatelessWidget {
               flex: 3,
               child: WebView(
                 initialUrl: Uri.dataFromString(
-                        '<iframe id="player" type="text/html" width="640" height="390" src="http://www.youtube.com/embed/${video.id}" frameborder="0" allowfullscreen></iframe>',
+                        '<iframe id="player" type="text/html" width="100%" height="100%" src="http://www.youtube.com/embed/${video.id}" frameborder="0"></iframe>',
                         mimeType: 'text/html')
                     .toString(),
                 javascriptMode: JavascriptMode.unrestricted,
@@ -34,7 +35,7 @@ class VideoItem extends StatelessWidget {
           ),
           Expanded(
             flex: 1,
-            child: Row(
+            child: Column(
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5.0),
@@ -43,6 +44,16 @@ class VideoItem extends StatelessWidget {
                     iconSize: 24.0,
                     onPressed: () async {
                       await deleteItem(video.id);
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.fullscreen),
+                    iconSize: 24.0,
+                    onPressed: () async {
+                      await fullscreen(video.id);
                     },
                   ),
                 ),

@@ -1,5 +1,7 @@
 import 'package:YTFeed/models/video.dart';
+import 'package:YTFeed/pages/video.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -31,10 +33,31 @@ class _HomePageState extends State<HomePage> {
     _setLast(DateTime.now().millisecondsSinceEpoch);
   }
 
-  Route _createRoute() {
+  Route _subsRoute() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => SubPage(
         storage: widget.storage,
+      ),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(0.0, 1.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
+  }
+
+    Route _videoRoute(videoId) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => VideoPage(
+        videoId,
       ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
@@ -125,6 +148,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  _fullscreen(videoId){
+    Navigator.of(context).push(_videoRoute(videoId)).then((value) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,16 +167,16 @@ class _HomePageState extends State<HomePage> {
             itemCount: _videos.length,
             itemBuilder: (context, index) {
               return SizedBox(
-                  height: 150,
+                  height: 120,
                   child: VideoItem(_videos[_videos.keys.elementAt(index)]!,
-                      _deleteFromVideoList));
+                      _deleteFromVideoList, _fullscreen));
             },
           ),
         ),
       ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).push(_createRoute()).then((value) {
+          Navigator.of(context).push(_subsRoute()).then((value) {
             _loadSubList();
             _getRecentVideos();
           });
