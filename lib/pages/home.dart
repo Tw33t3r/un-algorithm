@@ -1,5 +1,3 @@
-import 'package:unalgorithm/models/video.dart';
-import 'package:unalgorithm/pages/video.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +7,8 @@ import 'package:unalgorithm/models/sub.dart';
 import 'package:unalgorithm/models/storage.dart';
 import 'package:unalgorithm/pages/sub_page.dart';
 import 'package:unalgorithm/components/video_item.dart';
+import 'package:unalgorithm/models/video.dart';
+import 'package:unalgorithm/pages/video.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.storage});
@@ -176,10 +176,7 @@ class _HomePageState extends State<HomePage> {
       ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).push(_subsRoute()).then((value) {
-            _loadSubList();
-            _getRecentVideos();
-          });
+          Navigator.of(context).push(_subsRoute());
         },
         tooltip: 'Add A Subscription',
         child: const Icon(Icons.add),
