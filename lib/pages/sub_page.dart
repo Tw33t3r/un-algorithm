@@ -2,14 +2,12 @@ import 'package:unalgorithm/components/sub_item.dart';
 import 'package:unalgorithm/models/sub.dart';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:unalgorithm/services/scraper.dart';
 
-import '../models/storage.dart';
+import '../services/storage.dart';
 
 class SubPage extends StatefulWidget {
-  const SubPage({super.key, required this.storage});
-
-  final Storage storage;
+  const SubPage({super.key});
 
   final String title = "Subs";
 
@@ -21,6 +19,8 @@ class _SubsPageState extends State<SubPage> {
   final _formKey = GlobalKey<FormState>();
   final _urlController = TextEditingController();
   Map<String, Sub> _subs = {};
+  Scraper scraper = Scraper();
+  Storage storage = Storage();
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _SubsPageState extends State<SubPage> {
 //TODO Move logic for subs outside of this widget
 //TODO Change explicit title to scraped title
   _loadSubList() async {
-    widget.storage.readSubs().then((result) {
+    storage.readSubs().then((result) {
       setState(() {
         _subs = result;
       });
@@ -41,7 +41,7 @@ class _SubsPageState extends State<SubPage> {
   _deleteFromSubList(String channelId) async {
     setState(() {
       _subs.remove(channelId);
-      widget.storage.writeSubs(_subs);
+      storage.writeSubs(_subs);
     });
   }
 
@@ -50,29 +50,15 @@ class _SubsPageState extends State<SubPage> {
       Sub newSub = await _getSubFromChannelURL(channelURL);
       setState(() {
         _subs[newSub.channelId] = newSub;
-        widget.storage.writeSubs(_subs);
+        storage.writeSubs(_subs);
       });
     } catch (e) {
       rethrow;
     }
   }
 
-  _getSubFromChannelURL(String channelURL) async {
-    final response = await http.get(Uri.parse(channelURL));
-    RegExp imageExp = RegExp("\"image_src\" href=\"(.*?)(?=\")");
-    RegExp channelIdExp = RegExp("externalId\":\"(.*?)(?=\")");
-    RegExp nameExp = RegExp("meta property=\"og:title\" content=\"(.*?)(?=\")");
-    try {
-      final imageURL = imageExp.firstMatch(response.body)!.group(1);
-      final channelId = channelIdExp.firstMatch(response.body)!.group(1);
-      final name = nameExp.firstMatch(response.body)!.group(1);
-      if (imageURL == null || channelId == null || name == null) {
-        throw NullThrownError();
-      }
-      return Sub(channelId: channelId, imageURL: imageURL, name: name);
-    } catch (e) {
-      rethrow;
-    }
+  Future<Sub> _getSubFromChannelURL(String channelURL) async {
+    return await scraper.getSubFromChannelURL(channelURL);
   }
 
   @override

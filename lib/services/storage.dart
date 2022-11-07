@@ -26,7 +26,6 @@ class Storage {
     try {
       final file = await _localSubFile;
 
-      // Read the file
       final contents = await file.readAsString();
       Map<String, dynamic> result = json.decode(contents);
 
@@ -37,15 +36,13 @@ class Storage {
 
       return (toReturn);
     } catch (e) {
-      // If encountering an error, return 0
       return {};
     }
   }
 
-  Future<File> writeSubs(subs) async {
-      final file = await _localSubFile;
+  Future<File> writeSubs(Map<String, Sub> subs) async {
+    final file = await _localSubFile;
 
-    // Write the file
     return file.writeAsString(json.encode(subs));
   }
 
@@ -53,7 +50,6 @@ class Storage {
     try {
       final file = await _localVidFile;
 
-      // Read the file
       final contents = await file.readAsString();
       Map<String, dynamic> result = json.decode(contents);
 
@@ -64,15 +60,12 @@ class Storage {
 
       return (toReturn);
     } catch (e) {
-      // If encountering an error, return 0
       return {};
     }
   }
 
-  Future<File> writeVideos(videos) async {
-      final file = await _localVidFile;
-
-    // Write the file
+  Future<File> writeVideos(Map<String, Video> videos) async {
+    final file = await _localVidFile;
     return file.writeAsString(json.encode(videos));
   }
 }

@@ -2,7 +2,8 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:unalgorithm/pages/home.dart';
 import 'package:flutter/material.dart';
 
-import 'models/storage.dart';
+import 'package:unalgorithm/services/scraper.dart';
+import 'package:unalgorithm/services/storage.dart';
 
 void main() {
   runApp(const Unalgorithm());
@@ -17,6 +18,7 @@ class Unalgorithm extends StatefulWidget {
 }
 
 class _UnalgorithmState extends State<Unalgorithm> {
+  Scraper scraper = Scraper();
 
   @override
   void initState() {
@@ -25,24 +27,21 @@ class _UnalgorithmState extends State<Unalgorithm> {
   }
 
   Future<void> initPlatformState() async {
-    // Configure BackgroundFetch.
     int status = await BackgroundFetch.configure(BackgroundFetchConfig(
-        minimumFetchInterval: 15,
+        minimumFetchInterval: 480,
         stopOnTerminate: false,
         enableHeadless: true,
         requiresBatteryNotLow: false,
         requiresCharging: false,
         requiresStorageNotLow: false,
         requiresDeviceIdle: false,
-        requiredNetworkType: NetworkType.NONE
+        requiredNetworkType: NetworkType.NONE,
     ), (String taskId) async {
-      print("[BackgroundFetch] Event received $taskId");
+      await scraper.getRecentVideos();
       BackgroundFetch.finish(taskId);
     }, (String taskId) async {
-      print("[BackgroundFetch] TASK TIMEOUT taskId: $taskId");
       BackgroundFetch.finish(taskId);
     });
-    print('[BackgroundFetch] configure success: $status');
     if (!mounted) return;
   }
   
@@ -53,7 +52,7 @@ class _UnalgorithmState extends State<Unalgorithm> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(storage: Storage()),
+      home: const HomePage(),
     );
   }
 
