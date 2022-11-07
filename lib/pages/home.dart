@@ -1,14 +1,14 @@
-import 'package:YTFeed/models/video.dart';
-import 'package:YTFeed/pages/video.dart';
+import 'package:unalgorithm/models/video.dart';
+import 'package:unalgorithm/pages/video.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:YTFeed/models/sub.dart';
-import 'package:YTFeed/models/storage.dart';
-import 'package:YTFeed/pages/sub_page.dart';
-import 'package:YTFeed/components/video_item.dart';
+import 'package:unalgorithm/models/sub.dart';
+import 'package:unalgorithm/models/storage.dart';
+import 'package:unalgorithm/pages/sub_page.dart';
+import 'package:unalgorithm/components/video_item.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.storage});

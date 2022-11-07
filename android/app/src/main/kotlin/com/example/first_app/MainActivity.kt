@@ -1,4 +1,4 @@
-package com.example.YTFeed
+package com.example.unalgorithm
 
 import io.flutter.embedding.android.FlutterActivity
 

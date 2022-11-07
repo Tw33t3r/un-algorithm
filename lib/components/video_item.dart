@@ -1,4 +1,4 @@
-import 'package:YTFeed/models/video.dart';
+import 'package:unalgorithm/models/video.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 

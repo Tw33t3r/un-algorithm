@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:YTFeed/models/sub.dart';
-import 'package:YTFeed/models/video.dart';
+import 'package:unalgorithm/models/sub.dart';
+import 'package:unalgorithm/models/video.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Storage {

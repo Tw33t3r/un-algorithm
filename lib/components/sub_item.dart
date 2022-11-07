@@ -1,4 +1,4 @@
-import 'package:YTFeed/models/sub.dart';
+import 'package:unalgorithm/models/sub.dart';
 import 'package:flutter/material.dart';
 
 /// A ListItem that contains data to display a message.
@@ -30,14 +30,6 @@ class SubItem extends StatelessWidget {
             flex: 1,
             child: Row(
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  child: IconButton(
-                    icon: const Icon(Icons.edit),
-                    iconSize: 24.0,
-                    onPressed: () {},
-                  ),
-                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5.0),
                   child: IconButton(

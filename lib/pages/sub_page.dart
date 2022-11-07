@@ -1,5 +1,5 @@
-import 'package:YTFeed/components/sub_item.dart';
-import 'package:YTFeed/models/sub.dart';
+import 'package:unalgorithm/components/sub_item.dart';
+import 'package:unalgorithm/models/sub.dart';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -19,10 +19,8 @@ class SubPage extends StatefulWidget {
 
 class _SubsPageState extends State<SubPage> {
   final _formKey = GlobalKey<FormState>();
-  final _channelController = TextEditingController();
-  final _idController = TextEditingController();
+  final _urlController = TextEditingController();
   Map<String, Sub> _subs = {};
-  int _last = 0;
 
   @override
   void initState() {
@@ -47,13 +45,11 @@ class _SubsPageState extends State<SubPage> {
     });
   }
 
-  _addToSubList(String newName, String newChannelId) async {
+  _addToSubList(String channelURL) async {
     try {
-      String newImageURL = await _getSubImageURL(newChannelId);
+      Sub newSub = await _getSubFromChannelURL(channelURL);
       setState(() {
-        Sub newSub =
-            Sub(name: newName, channelId: newChannelId, imageURL: newImageURL);
-        _subs[newChannelId] = newSub;
+        _subs[newSub.channelId] = newSub;
         widget.storage.writeSubs(_subs);
       });
     } catch (e) {
@@ -61,13 +57,19 @@ class _SubsPageState extends State<SubPage> {
     }
   }
 
-  _getSubImageURL(String channelId) async {
-    final String ytUrl = "https://www.youtube.com/channel/$channelId";
-    final response = await http.get(Uri.parse(ytUrl));
+  _getSubFromChannelURL(String channelURL) async {
+    final response = await http.get(Uri.parse(channelURL));
     RegExp imageExp = RegExp("\"image_src\" href=\"(.*?)(?=\")");
+    RegExp channelIdExp = RegExp("externalId\":\"(.*?)(?=\")");
+    RegExp nameExp = RegExp("meta property=\"og:title\" content=\"(.*?)(?=\")");
     try {
       final imageURL = imageExp.firstMatch(response.body)!.group(1);
-      return imageURL;
+      final channelId = channelIdExp.firstMatch(response.body)!.group(1);
+      final name = nameExp.firstMatch(response.body)!.group(1);
+      if (imageURL == null || channelId == null || name == null) {
+        throw NullThrownError();
+      }
+      return Sub(channelId: channelId, imageURL: imageURL, name: name);
     } catch (e) {
       rethrow;
     }
@@ -87,25 +89,12 @@ class _SubsPageState extends State<SubPage> {
             TextFormField(
               decoration: const InputDecoration(
                 border: UnderlineInputBorder(),
-                labelText: 'Enter the name for this channel',
+                labelText: 'https://www.youtube.com/user/example',
               ),
-              controller: _channelController,
+              controller: _urlController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a name for this channel';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: 'Enter the channel ID',
-              ),
-              controller: _idController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Enter the channel ID';
+                  return 'Enter the channel URL';
                 }
                 return null;
               },
@@ -115,7 +104,7 @@ class _SubsPageState extends State<SubPage> {
               child: ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    _addToSubList(_channelController.text, _idController.text);
+                    _addToSubList(_urlController.text);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Saved Channel')),
                     );
