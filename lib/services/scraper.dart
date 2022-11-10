@@ -35,7 +35,7 @@ class Scraper {
             'https://www.youtube.com/feeds/videos.xml?channel_id=$channelId';
         final response = await http.get(Uri.parse(xml));
         RegExp videoExp = RegExp(
-            r"<entry>[\s\S]*?<yt:videoId>([\s\S]*?)<\/yt:videoId>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<updated>([\s\S]*?)<\/updated>");
+            r"<entry>[\s\S]*?<yt:videoId>([\s\S]*?)<\/yt:videoId>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<published>([\s\S]*?)<\/published>");
         final expMatches = videoExp.allMatches(response.body);
         for (final match in expMatches) {
           final String? videoId = match.group(1);
