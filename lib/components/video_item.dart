@@ -19,13 +19,24 @@ class VideoItem extends StatelessWidget {
         children: <Widget>[
           Expanded(
               flex: 3,
-              child: WebView(
-                initialUrl: Uri.dataFromString(
-                        '<iframe id="player" type="text/html" width="100%" height="100%" src="http://www.youtube.com/embed/${video.id}" frameborder="0"></iframe>',
-                        mimeType: 'text/html')
-                    .toString(),
-                javascriptMode: JavascriptMode.unrestricted,
-              )),
+              child: 
+                Image.network(
+                  video.thumbnailUrl,
+                  fit: BoxFit.fill,
+                  loadingBuilder: (BuildContext context, Widget child,
+                      ImageChunkEvent? loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                )
+              ),
           Expanded(
             flex: 2,
             child: _VideoDescription(

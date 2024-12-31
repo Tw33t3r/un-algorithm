@@ -35,20 +35,21 @@ class Scraper {
             'https://www.youtube.com/feeds/videos.xml?channel_id=$channelId';
         final response = await http.get(Uri.parse(xml));
         RegExp videoExp = RegExp(
-            r"<entry>[\s\S]*?<yt:videoId>([\s\S]*?)<\/yt:videoId>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<published>([\s\S]*?)<\/published>");
+            r'<entry>[\s\S]*?<yt:videoId>([\s\S]*?)<\/yt:videoId>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<published>([\s\S]*?)<\/published>[\s\S]*?<media:thumbnail url="([\s\S]*?)"');
         final expMatches = videoExp.allMatches(response.body);
         for (final match in expMatches) {
           final String? videoId = match.group(1);
           final String? name = match.group(2);
           final String? lastUpdatedMatch = match.group(3);
-          if (videoId == null || lastUpdatedMatch == null || name == null) {
-            throw NullThrownError();
+          final String? thumbnailUrl = match.group(4);
+          if (videoId == null || lastUpdatedMatch == null || name == null || thumbnailUrl == null) {
+            throw 'Null Value';
           }
           final lastUpdated =
               DateTime.parse(lastUpdatedMatch).millisecondsSinceEpoch;
           if (lastUpdated > last) {
             final Video newVideo =
-                Video(id: videoId, name: name, lastUpdated: lastUpdated);
+                Video(id: videoId, name: name, lastUpdated: lastUpdated, thumbnailUrl: thumbnailUrl);
             videos[videoId] = newVideo;
          }
         }
@@ -71,7 +72,7 @@ class Scraper {
       final channelId = channelIdExp.firstMatch(response.body)!.group(1);
       final name = nameExp.firstMatch(response.body)!.group(1);
       if (imageURL == null || channelId == null || name == null) {
-        throw NullThrownError();
+        throw 'Null Value';
       }
       return Sub(channelId: channelId, imageURL: imageURL, name: name);
     } catch (e) {

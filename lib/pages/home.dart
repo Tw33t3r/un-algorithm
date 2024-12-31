@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:unalgorithm/services/storage.dart';
 import 'package:unalgorithm/pages/sub_page.dart';
@@ -7,6 +8,7 @@ import 'package:unalgorithm/components/video_item.dart';
 import 'package:unalgorithm/models/video.dart';
 import 'package:unalgorithm/pages/video.dart';
 
+import 'dart:convert'; import 'dart:developer' as developer;
 import '../services/scraper.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,6 +22,23 @@ class _HomePageState extends State<HomePage> {
   Scraper scraper = Scraper();
   Map<String, Video> _videos = {};
   Storage storage = Storage();
+  WebViewController controller = WebViewController()
+  ..enableZoom(false)
+  ..setJavaScriptMode(JavaScriptMode.unrestricted)
+  ..setBackgroundColor(const Color(0x00000000))
+  ..setNavigationDelegate(
+    NavigationDelegate(
+      onProgress: (int progress) {
+        // Update loading bar.
+      },
+      onPageStarted: (String url) {},
+      onPageFinished: (String url) {},
+      onWebResourceError: (WebResourceError error) {},
+      onNavigationRequest: (NavigationRequest request) {
+        return NavigationDecision.navigate;
+      },
+    ),
+  );
 
   @override
   void initState() {
@@ -47,10 +66,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Route _videoRoute(videoId) {
+  Route _videoRoute(videoId, controller) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => VideoPage(
         videoId,
+        controller
       ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
@@ -90,8 +110,13 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  _fullscreen(videoId) {
-    Navigator.of(context).push(_videoRoute(videoId)).then((value) {
+  _fullscreen(videoId) async {
+    var html = Uri.dataFromString(
+      '<head><style type="text/css"> html, body { width:100%; height: 100%; margin: 0px; padding: 0px; } </style></head><body><iframe id="player" margin="0" padding="0" width="100%" height="100%" src="https://www.youtube.com/embed/$videoId" frameborder="0"></iframe></body>',
+      mimeType: 'text/html');
+    await controller.loadRequest(html);
+
+    Navigator.of(context).push(_videoRoute(videoId, controller)).then((value) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     });
   }
@@ -128,6 +153,7 @@ class _HomePageState extends State<HomePage> {
         tooltip: 'Add A Subscription',
         child: const Icon(Icons.add),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
